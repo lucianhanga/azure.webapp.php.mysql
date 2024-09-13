@@ -25,7 +25,7 @@ jobs:
       - name: Create the Storage Account
         run: |
           az storage account create \
-              --name  terraformF1AB3C1F\
+              --name  terraform1f4e02e1\
               --resource-group rg-webappphpmysql \
               --location westeurope \
               --sku Standard_LRS \
@@ -35,4 +35,4 @@ jobs:
         run: |
           az storage container create \
               --name tfstate \
-              --account-name terraformF1AB3C1F
+              --account-name terraform1f4e02e1
