@@ -9,7 +9,7 @@ terraform {
 
   backend "azurerm" {
     resource_group_name   = "rg-webappphpmysql"
-    storage_account_name  = "terraformF1AB3C1F"
+    storage_account_name  = "terraform1f4e02e1"
     container_name        = "tfstate"
     key                   = "terraform.tfstate"
   }
