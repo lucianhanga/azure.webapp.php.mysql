@@ -1,4 +1,4 @@
-name: 2. Deploy Camera App
+name: 3. Deploy the PHP Web App
 
 on:
   push:
