@@ -106,11 +106,21 @@ jobs:
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
-      - name: Upload artifact for deployment job
+      - name: Check if the webapp folder exists
+        id: check_webapp
+        run: test -d webapp
+
+      # show the content of the webapp folder
+      - name: List the content of the webapp folder
+        if: steps.check_webapp.outputs.status == 0
+        run: ls -la webapp
+
+      # upload as an artifact the webapp folder
+      - name : Upload artifact for deployment job
+        if: steps.check_webapp.outputs.status == 0
         uses: actions/upload-artifact@v3
         with:
           name: php-app
-          path: ./webapp
 
   deploy:
     permissions:
@@ -141,6 +151,7 @@ jobs:
       - name: Display the publish profile from the environment variable
         run: echo $AZURE_WEBAPP_PUBLISH_PROFILE
 
+        # deploy the content of the webapp folder to the Azure Web App
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -148,7 +159,7 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
           # publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # use the secret
-          package: ./webapp
+          package: ${{ github.workspace }}/php-app
 
       - name: 'Post deployment URL'
         run: echo "https://${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net"
