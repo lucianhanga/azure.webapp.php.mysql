@@ -121,6 +121,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: php-app
+          path: ./webapp
 
   deploy:
     permissions:
