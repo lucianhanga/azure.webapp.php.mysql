@@ -2,7 +2,12 @@ name: 3. Deploy the PHP Web App
 
 on:
   push:
-    branches: [ "main" , "3-hello-world-hph-app" ]
+    branches: [ "main" ]
+    # only changes are done to the webapp folder and the workflow file
+    paths:
+      - 'webapp/**'
+      - '.github/workflows/3.deploy.webapp.yml'
+
   workflow_dispatch:
 
 env:
