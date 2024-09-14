@@ -71,102 +71,21 @@ jobs:
         continue-on-error: false
 
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@7c0b4c8c8ebed23eca9ec2802474895d105b11bc
-        with:
-          php-version: ${{ env.PHP_VERSION }}
-
-      - name: Check if composer.json exists
-        id: check_files
-        uses: andstor/file-existence-action@87d74d4732ddb824259d80c8a508c0124bf1c673
-        with:
-          files: 'composer.json'
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: |
-          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Set up dependency caching for faster installs
-        uses: actions/cache@v3
-        if: steps.check_files.outputs.files_exists == 'true'
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Run composer install if composer.json exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
-
-      - name: Check if the webapp folder exists
-        id: check_webapp
-        run: test -d webapp
-
-      # show the content of the webapp folder
-      - name: List the content of the webapp folder
-        if: steps.check_webapp.outputs.status == 0
-        run: ls -la webapp
-
-      # upload as an artifact the webapp folder
-      - name : Upload artifact for deployment job
-        if: steps.check_webapp.outputs.status == 0
-        uses: actions/upload-artifact@v3
-        with:
-          name: php-app
-          path: ./webapp
-
-  deploy:
-    permissions:
-      contents: none
-    runs-on: ubuntu-latest
-    needs: [ infrastructure, build ]
-    environment:
-      name: 'Development'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    steps:
+        build-and-deploy:
+          runs-on: ubuntu-latest
       
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: php-app
-
-      - name: Download artifact from infrastructure query job
-        uses: actions/download-artifact@v3
-        with:
-          name: publishingProfile
-
-      - name: Display the publish profile
-        run: cat $GITHUB_WORKSPACE/publishingProfile.xml
-
-      - name: Set up environment variable for the content of the publish profile
-        run: echo "AZURE_WEBAPP_PUBLISH_PROFILE=$(cat $GITHUB_WORKSPACE/publishingProfile.xml)" >> $GITHUB_ENV
-
-      - name: Display the publish profile from the environment variable
-        run: echo $AZURE_WEBAPP_PUBLISH_PROFILE
-
-        # deploy the content of the webapp folder to the Azure Web App
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ env.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          # publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # use the secret
-          package: ${{ github.workspace }}/php-app
-
-      - name: 'Post deployment URL'
-        run: echo "https://${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net"
-        id: webapp-url
-
-      - name: 'Deployment status'
-        run: echo "The webapp has been deployed to ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
-
-
+          steps:
+          - name: Checkout the repository
+            uses: actions/checkout@v2
+      
+          - name: Set up Azure CLI
+            uses: azure/login@v1
+            with:
+              creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+          - name: Deploy to Azure WebApp
+            uses: azure/webapps-deploy@v2
+            with:
+              app-name: ${{ env.AZURE_WEBAPP_NAME }}
+              slot-name: production
+              package: ./webapp
