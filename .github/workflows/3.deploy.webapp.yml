@@ -21,71 +21,21 @@ permissions:
   contents: read
   
 jobs:
-
-
-  infrastructure:
-    name: 'Querry Infrastructure'
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: List Resource Groups
-        run: az group list --output table
-
-      - name: Check if the Resource Group exists
-        id: check_rg
-        # the name of the group is in the acrtion's environment variables
-        run: az group exists --name ${{ env.AZURE_WEBAPP_RESOURCE_GROUP }}  # check if the resource group exists
-        # if it does not exist, error with red color and stop the workflow
-        continue-on-error: false
-
-      - name: Check if the application exists
-        id: check_app
-        run: | 
-          az webapp show \
-              --name ${{ env.AZURE_WEBAPP_NAME }} \
-              --resource-group ${{ env.AZURE_WEBAPP_RESOURCE_GROUP }}
-        continue-on-error: false
-
-      - name: Get the publish profile
-        id: get_publish_profile
-        run: |
-          az webapp deployment list-publishing-profiles \
-              --name ${{ env.AZURE_WEBAPP_NAME }} \
-              --resource-group ${{ env.AZURE_WEBAPP_RESOURCE_GROUP }} \
-              --xml > $GITHUB_WORKSPACE/publishingProfile.xml
-        continue-on-error: false
-
-      - name: Display the publish profile
-        if: steps.get_publish_profile.outputs.exitcode == 0
-        run: cat $GITHUB_WORKSPACE/publishingProfile.xml
-
-      - name: upload artifact for deployment job
-        uses: actions/upload-artifact@v3
-        with:
-          name: publishingProfile
-          path: ./publishingProfile.xml
-        continue-on-error: false
-
-
-        build-and-deploy:
-          runs-on: ubuntu-latest
-      
-          steps:
-          - name: Checkout the repository
-            uses: actions/checkout@v2
-      
-          - name: Set up Azure CLI
-            uses: azure/login@v1
-            with:
-              creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-          - name: Deploy to Azure WebApp
-            uses: azure/webapps-deploy@v2
-            with:
-              app-name: ${{ env.AZURE_WEBAPP_NAME }}
-              slot-name: production
-              package: ./webapp
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+    
+    - name: Set up Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy to Azure WebApp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        slot-name: production
+        package: ./webapp
