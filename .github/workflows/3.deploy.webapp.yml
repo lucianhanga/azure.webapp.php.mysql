@@ -1,8 +1,8 @@
 name: 2. Deploy Camera App
 
 on:
-#   push:
-#     branches: [ "main" ]
+  push:
+    branches: [ "main" , "3-hello-world-hph-app" ]
 #     # only from the react-webcam-app directory
 #     paths:
 #       - 'react-webcam-app/**'
