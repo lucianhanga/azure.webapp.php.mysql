@@ -17,9 +17,7 @@ permissions:
   
 jobs:
 
-  #
-  # querry infrastructure to get the publish profile for the webapp
-  #
+
   infrastructure:
     name: 'Querry Infrastructure'
     runs-on: ubuntu-latest
@@ -28,14 +26,17 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: List Resource Groups
         run: az group list --output table
+
       - name: Check if the Resource Group exists
         id: check_rg
         # the name of the group is in the acrtion's environment variables
         run: az group exists --name ${{ env.AZURE_WEBAPP_RESOURCE_GROUP }}  # check if the resource group exists
         # if it does not exist, error with red color and stop the workflow
         continue-on-error: false
+
       - name: Check if the application exists
         id: check_app
         run: | 
@@ -43,6 +44,7 @@ jobs:
               --name ${{ env.AZURE_WEBAPP_NAME }} \
               --resource-group ${{ env.AZURE_WEBAPP_RESOURCE_GROUP }}
         continue-on-error: false
+
       - name: Get the publish profile
         id: get_publish_profile
         run: |
@@ -51,9 +53,11 @@ jobs:
               --resource-group ${{ env.AZURE_WEBAPP_RESOURCE_GROUP }} \
               --xml > $GITHUB_WORKSPACE/publishingProfile.xml
         continue-on-error: false
+
       - name: Display the publish profile
         if: steps.get_publish_profile.outputs.exitcode == 0
         run: cat $GITHUB_WORKSPACE/publishingProfile.xml
+
       - name: upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
@@ -64,8 +68,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs:  infrastructure
-
     steps:
       - uses: actions/checkout@v4
 
