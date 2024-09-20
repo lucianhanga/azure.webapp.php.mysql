@@ -7,6 +7,8 @@ jobs:
   deploy:
     name: 'Deploy Terraform state bucket'
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set the GH_TOKEN environment variable
     defaults:
       run:
         shell: bash
@@ -58,5 +60,5 @@ jobs:
 
       - name: Save the name in the GitHub Action secret
         run: |
-          gh secret set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+          gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
