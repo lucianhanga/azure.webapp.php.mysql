@@ -25,7 +25,6 @@ jobs:
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ secrets.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
           fi
           echo "Storage Account Name: ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}"
-        shell: bash
 
       - name: Set Container Name
         run: echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
@@ -46,7 +45,6 @@ jobs:
               --location ${{ vars.AZURE_LOCATION }} \
               --sku Standard_LRS \
               --allow-blob-public-access false
-          # if error stop the workflow and fail wih the error message
           if [ $? -ne 0 ]; then
             echo "Failed to create the storage account"
             exit 1
