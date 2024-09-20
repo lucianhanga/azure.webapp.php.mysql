@@ -12,8 +12,8 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name   = "rg-webappphpmysql"
-    storage_account_name  = "terraform1f4e02e1"
+    resource_group_name   = var.resource_group_name
+    storage_account_name  = var.terraform_storage_account_name
     container_name        = "tfstate"
     key                   = "terraform.tfstate"
   }
@@ -35,10 +35,6 @@ provider "azurerm" {
     }    
   }
   subscription_id = var.subscription_id
-}
-
-locals {
-  resource_group_name = "rg-${var.project_name}"
 }
 
 

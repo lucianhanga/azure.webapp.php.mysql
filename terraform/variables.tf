@@ -26,3 +26,12 @@ variable "project_name" {
   type        = string
 }
 
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  type        = string
+}
+
+variable "terraform_storage_account_name" {
+  description = "The name of the storage account to store the Terraform state file"
+  type        = string
+}
