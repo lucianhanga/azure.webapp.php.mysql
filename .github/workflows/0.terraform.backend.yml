@@ -45,6 +45,11 @@ jobs:
               --location ${{ vars.AZURE_LOCATION }} \
               --sku Standard_LRS \
               --allow-blob-public-access false
+          # if error stop the workflow and fail wih the error message
+          if [ $? -ne 0 ]; then
+            echo "Failed to create the storage account"
+            exit 1
+          fi
 
       - name: Create the Storage Container
         run: |
