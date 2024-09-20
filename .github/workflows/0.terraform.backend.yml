@@ -1,28 +1,34 @@
 name: 0. Terraform Backend Provisioning
 
-# Controls when the workflow will run
 on:
   workflow_dispatch:
+
 jobs:
   deploy:
     name: 'Deploy Terraform state bucket'
     runs-on: ubuntu-latest
-
     defaults:
       run:
         shell: bash
 
     steps:
-      - name: Generate Terraform backend storage account suffix - 8 characters 
-        id: random
+      - name: Check if TERRAFORM_STORAGE_ACCOUNT_NAME is defined
+        id: check-secret
         run: |
-          random_suffix=$(cat /dev/urandom | tr -dc 'A-Z' | fold -w 8 | head -n 1)
-          echo "Generated string: $random_suffix"
-          echo "RANDOM_SUFFIX=$random_suffix" >> $GITHUB_ENV
-          # create a new storage account name using the random suffix in an environment variable
-          echo "TERRAFORM_STORAGE_ACCOUNT_NAME=terraform$random_suffix" >> $GITHUB_ENV
-          echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
- 
+          if [ -z "${{ secrets.TERRAFORM_STORAGE_ACCOUNT_NAME }}" ]; then
+            echo "Secret TERRAFORM_STORAGE_ACCOUNT_NAME is not defined, generating a random suffix."
+            random_suffix=$(cat /dev/urandom | tr -dc 'A-Z' | fold -w 8 | head -n 1)
+            echo "Generated string: $random_suffix"
+            echo "TERRAFORM_STORAGE_ACCOUNT_NAME=terraform$random_suffix" >> $GITHUB_ENV
+          else
+            echo "Using existing secret for TERRAFORM_STORAGE_ACCOUNT_NAME."
+            echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ secrets.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: Set Container Name
+        run: echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -36,18 +42,17 @@ jobs:
           az storage account create \
               --name  ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} \
               --resource-group ${{ vars.AZURE_GROUP_NAME }} \
-              --location ${{AZURE_LOCATION}} \
+              --location ${{ vars.AZURE_LOCATION }} \
               --sku Standard_LRS \
               --allow-blob-public-access false
 
       - name: Create the Storage Container
         run: |
           az storage container create \
-              --name tfstate \
+              --name ${{ env.TERRAFORM_STORAGE_CONTAINER_NAME }} \
               --account-name ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
-      - name: Save the name in the github axtion secret
+      - name: Save the name in the GitHub Action secret
         run: |
-          gh secret set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} 
+          gh secret set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
-      
