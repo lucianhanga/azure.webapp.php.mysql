@@ -63,5 +63,5 @@ jobs:
 
       - name: Save the name in the GitHub Action secret
         run: |
-          gh secret set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+          gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
