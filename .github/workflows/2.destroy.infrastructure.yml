@@ -15,13 +15,19 @@ jobs:
       TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
       TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}      
       # # these are needed for the Azure CLI to authenticate with Azure
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      # environment variables for Terraform
+      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_resource_group_name: ${{ vars.AZURE_GROUP_NAME }}
+      TF_VAR_location: ${{ vars.AZURE_LOCATION }}
+      TF_VAR_terraform_storage_account_name: ${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+
       # prepare the steps to destroy the resources
     steps:
         - name: Checkout code
@@ -32,7 +38,10 @@ jobs:
 
         - name: Initialize Terraform
           working-directory: ./terraform
-          run: terraform init
+          run: |
+            terraform init \
+              -backend-config="resource_group_name=${TF_VAR_resource_group_name}" \
+              -backend-config="storage_account_name=${TF_VAR_terraform_storage_account_name}"
 
         - name: Validate Terraform
           working-directory: ./terraform

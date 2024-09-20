@@ -1,38 +1,63 @@
 name: 0. Terraform Backend Provisioning
 
-# Controls when the workflow will run
 on:
   workflow_dispatch:
+
 jobs:
   deploy:
     name: 'Deploy Terraform state bucket'
     runs-on: ubuntu-latest
-
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+      
     defaults:
       run:
         shell: bash
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Check if TERRAFORM_STORAGE_ACCOUNT_NAME is defined
+        id: check-secret
+        run: |
+          if [ -z "${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" ]; then
+            echo "Variable TERRAFORM_STORAGE_ACCOUNT_NAME is not defined, generating a random suffix."
+            storage_account_name="terraform${RANDOM}${RANDOM}"
+            echo "Generated Storage Account Name: $storage_account_name"
+            echo "TERRAFORM_STORAGE_ACCOUNT_NAME=$storage_account_name" >> $GITHUB_ENV
+            gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
+          else
+            echo "Using existing variable for TERRAFORM_STORAGE_ACCOUNT_NAME."
+            echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set Container Name
+        run: echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Create the Storage Account
         run: |
           az storage account create \
-              --name  terraform1f4e02e1\
-              --resource-group rg-webappphpmysql \
-              --location westeurope \
+              --name  ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} \
+              --resource-group ${{ vars.AZURE_GROUP_NAME }} \
+              --location ${{ vars.AZURE_LOCATION }} \
               --sku Standard_LRS \
               --allow-blob-public-access false
+          if [ $? -ne 0 ]; then
+            echo "Failed to create the storage account"
+            exit 1
+          fi
 
       - name: Create the Storage Container
         run: |
           az storage container create \
-              --name tfstate \
-              --account-name terraform1f4e02e1
+              --name ${{ env.TERRAFORM_STORAGE_CONTAINER_NAME }} \
+              --account-name ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+
+
