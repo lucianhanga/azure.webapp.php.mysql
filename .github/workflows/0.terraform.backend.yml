@@ -29,7 +29,6 @@ jobs:
             echo "Using existing variable for TERRAFORM_STORAGE_ACCOUNT_NAME."
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
           fi
-          echo "Storage Account Name: ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}"
 
       - name: Set Container Name
         run: echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
