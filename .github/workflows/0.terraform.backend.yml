@@ -24,6 +24,7 @@ jobs:
             echo "Using existing secret for TERRAFORM_STORAGE_ACCOUNT_NAME."
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ secrets.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
           fi
+          echo "Storage Account Name: ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}"
         shell: bash
 
       - name: Set Container Name
