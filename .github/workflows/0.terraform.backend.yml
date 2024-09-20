@@ -8,7 +8,10 @@ jobs:
     name: 'Deploy Terraform state bucket'
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set the GH_TOKEN environment variable
+      # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set the GH_TOKEN environment variable
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+      
     defaults:
       run:
         shell: bash
