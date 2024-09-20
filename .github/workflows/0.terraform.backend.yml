@@ -39,26 +39,26 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Create the Storage Account
-        run: |
-          az storage account create \
-              --name  ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} \
-              --resource-group ${{ vars.AZURE_GROUP_NAME }} \
-              --location ${{ vars.AZURE_LOCATION }} \
-              --sku Standard_LRS \
-              --allow-blob-public-access false
-          if [ $? -ne 0 ]; then
-            echo "Failed to create the storage account"
-            exit 1
-          fi
+      # - name: Create the Storage Account
+      #   run: |
+      #     az storage account create \
+      #         --name  ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} \
+      #         --resource-group ${{ vars.AZURE_GROUP_NAME }} \
+      #         --location ${{ vars.AZURE_LOCATION }} \
+      #         --sku Standard_LRS \
+      #         --allow-blob-public-access false
+      #     if [ $? -ne 0 ]; then
+      #       echo "Failed to create the storage account"
+      #       exit 1
+      #     fi
 
-      - name: Create the Storage Container
-        run: |
-          az storage container create \
-              --name ${{ env.TERRAFORM_STORAGE_CONTAINER_NAME }} \
-              --account-name ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+      # - name: Create the Storage Container
+      #   run: |
+      #     az storage container create \
+      #         --name ${{ env.TERRAFORM_STORAGE_CONTAINER_NAME }} \
+      #         --account-name ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
       - name: Save the name in the GitHub Action secret
         run: |
-          gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+          gh secret set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
