@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Show the GH_TOKEN
-        run: echo $GH_TOKEN
+        run: echo ${{ env.GH_TOKEN }}
       - name: Check if TERRAFORM_STORAGE_ACCOUNT_NAME is defined
         id: check-secret
         run: |
