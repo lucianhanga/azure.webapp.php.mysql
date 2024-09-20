@@ -17,10 +17,14 @@ jobs:
         run: |
           if [ -z "${{ secrets.TERRAFORM_STORAGE_ACCOUNT_NAME }}" ]; then
             echo "Secret TERRAFORM_STORAGE_ACCOUNT_NAME is not defined, generating a random suffix."
-            random_suffix=$(LC_ALL=C tr -dc 'a-z' < /dev/urandom | head -c 8)
+            chars=abcdefghijklmnopqrstuvwxyz0123456789
+            random_suffix=""
+            for i in {1..8}; do
+              random_char=${chars:RANDOM%${#chars}:1}
+              random_suffix="$random_suffix$random_char"
+            done
             echo "Generated string: $random_suffix"
-            echo "TERRAFORM_STORAGE_ACCOUNT_NAME=terraform$random_suffix" >> $GITHUB_ENV
-          else
+            echo "RANDOM_SUFFIX=$random_suffix" >> $GITHUB_ENV          else
             echo "Using existing secret for TERRAFORM_STORAGE_ACCOUNT_NAME."
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ secrets.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
           fi
