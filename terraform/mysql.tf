@@ -54,12 +54,16 @@ resource "azurerm_subnet" "dbsubnet" {
   }
 }
 
+
 resource "azurerm_mysql_flexible_server" "dbserver" {
   name                = "db-server-${random_string.name.result}"
   location            = var.location
   resource_group_name = local.resource_group_name
-  administrator_login    = "mysqladmin"
-  administrator_password = random_password.password.result
+  administrator_login    = "mysqladmin" 
+  administrator_password = "12345Aaaaa!"
+  backup_retention_days = 7
+  delegated_subnet_id = azurerm_subnet.dbsubnet.id
+
   sku_name            = "B_Standard_B1ms"
 
 }
