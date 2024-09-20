@@ -13,9 +13,18 @@ jobs:
         shell: bash
 
     steps:
+      - name: Generate Terraform backend storage account suffix - 8 characters 
+        id: random
+        run: |
+          random_suffix=$(cat /dev/urandom | tr -dc 'A-Z' | fold -w 8 | head -n 1)
+          echo "Generated string: $random_suffix"
+          echo "RANDOM_SUFFIX=$random_suffix" >> $GITHUB_ENV
+          # create a new storage account name using the random suffix in an environment variable
+          echo "TERRAFORM_STORAGE_ACCOUNT_NAME=terraform$random_suffix" >> $GITHUB_ENV
+          echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
+ 
       - name: Checkout
         uses: actions/checkout@v2
-
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -25,9 +34,9 @@ jobs:
       - name: Create the Storage Account
         run: |
           az storage account create \
-              --name  terraform1f4e02e1\
-              --resource-group rg-webappphpmysql \
-              --location westeurope \
+              --name  ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} \
+              --resource-group ${{ vars.AZURE_GROUP_NAME }} \
+              --location ${{AZURE_LOCATION}} \
               --sku Standard_LRS \
               --allow-blob-public-access false
 
@@ -35,4 +44,10 @@ jobs:
         run: |
           az storage container create \
               --name tfstate \
-              --account-name terraform1f4e02e1
+              --account-name ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+
+      - name: Save the name in the github axtion secret
+        run: |
+          gh secret set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }} 
+
+      
