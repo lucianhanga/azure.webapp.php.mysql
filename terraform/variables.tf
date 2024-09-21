@@ -31,7 +31,7 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "terraform_storage_account_name" {
-  description = "The name of the storage account to store the Terraform state file"
-  type        = string
+variable "object_id" {
+  description = "The Object ID of the Service Principal"
 }
+

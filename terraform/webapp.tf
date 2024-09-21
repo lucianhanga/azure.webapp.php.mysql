@@ -29,6 +29,11 @@ resource "azurerm_linux_web_app" "webapp" {
         php_version = "8.1"
     }
   }
+
+  # enable the managed identity for the webapp
+    identity {
+        type = "SystemAssigned"
+    }
 }
 
 

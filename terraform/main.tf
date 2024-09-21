@@ -12,13 +12,8 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name   = "palceholder"
+    resource_group_name   = "palceholder" 
     storage_account_name  = "palceholder"
-    # resource_group_name   = var.resource_group_name
-    # storage_account_name  = var.terraform_storage_account_name
-#    resource_group_name   = "rg-webappphpmysql"
-#    storage_account_name  = "terraform3175825923"
-
     container_name        = "tfstate"
     key                   = "terraform.tfstate"
   }
