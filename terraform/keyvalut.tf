@@ -14,25 +14,16 @@ resource "azurerm_key_vault" "key_vault" {
   tenant_id            = var.tenant_id
   sku_name            = "standard"
 
+
+  # give access to the current user service principal to the key vault
+  #   to add the username and password to the key vault for the MySQL server
   access_policy {
     tenant_id = var.tenant_id
-    object_id = "00000000-0000-0000-0000-000000000000" # the object id of the current user
+    object_id = data.azurerm_client_config.current.object_id
     secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
   }
-
-  # # give access to the terraform service principal to the key vault
-  # #   to add the username and password to the key vault for the MySQL server
-  # access_policy {
-  #   tenant_id = var.tenant_id
-  #   object_id = data.azurerm_client_config.current.object_id
-  #   secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
-  # }
-
-  # give access to the webapp to read the username and password from the key vault
-  access_policy {
-    tenant_id = var.tenant_id
-    object_id = azurerm_linux_web_app.webapp.identity[0].principal_id
-    secret_permissions = ["Get"]
+  lifecycle {
+    ignore_changes = [access_policy]
   }
 
   purge_protection_enabled = false # make the key vault deletable for development purposes
@@ -41,6 +32,28 @@ resource "azurerm_key_vault" "key_vault" {
   #   so that we can give it access to the key vault
   depends_on = [ azurerm_linux_web_app.webapp ]
 }
+
+
+# give rights to the terraform service principal to read the username and password from the key vault
+resource azurerm_key_vault_access_policy "terraform" {
+  key_vault_id = azurerm_key_vault.key_vault.id
+  tenant_id = var.tenant_id
+  object_id = var.object_id
+  secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
+
+  depends_on = [ azurerm_key_vault.key_vault ]
+}
+
+# give rights to the webapp to read the username and password from the key vault
+resource azurerm_key_vault_access_policy "webapp" {
+  key_vault_id = azurerm_key_vault.key_vault.id
+  tenant_id = var.tenant_id
+  object_id = azurerm_linux_web_app.webapp.identity[0].principal_id
+  secret_permissions = ["Get"]
+
+  depends_on = [ azurerm_key_vault.key_vault ]
+}
+
 
 # add the mysql username and password to the key vault
 resource "azurerm_key_vault_secret" "mysql_username" {
