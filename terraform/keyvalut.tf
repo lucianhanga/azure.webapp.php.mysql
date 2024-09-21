@@ -14,6 +14,12 @@ resource "azurerm_key_vault" "key_vault" {
   tenant_id            = var.tenant_id
   sku_name            = "standard"
 
+  access_policy {
+    tenant_id = var.tenant_id
+    object_id = "00000000-0000-0000-0000-000000000000" # the object id of the current user
+    secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
+  }
+
   # give access to the terraform service principal to the key vault
   #   to add the username and password to the key vault for the MySQL server
   access_policy {
