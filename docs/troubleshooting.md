@@ -355,3 +355,71 @@ The `connection refused` error I think is not related to the *Key Vault* at all,
 ---
 
 I will follow now your advice and try to to create a Managed User Identity and use that one and check if it works.
+
+
+```bash
+az webapp show \
+>     --resource-group rg-webappphpmysql \
+>     --name webapp-webappphpmysql3 \
+>     --query "{name: name, systemIdentityEnabled: identity.type == 'SystemAssigned' || identity.type == 'SystemAssigned, UserAssigned', userAssignedIdentities: identity.userAssignedIdentities}"
+```
+
+result
+
+```
+{
+  "name": "webapp-webappphpmysql3",
+  "systemIdentityEnabled": false,
+  "userAssignedIdentities": {
+    "/subscriptions/44feaee5-c984-4c09-a02f-46c7d78ad294/resourcegroups/rg-webappphpmysql/providers/Microsoft.ManagedIdentity/userAssignedIdentities/webappphpmysql3": {
+      "clientId": "93ef3fa2-83a9-4f01-b605-8915590e7831",
+      "principalId": "fcd1a4ed-e367-477c-bb1b-f988dfbc18d0"
+    }
+  }
+}
+```
+
+
+```bash
+az keyvault show \
+    --name  kv-webappphpmysql3 \
+    --resource-group rg-webappphpmysql \
+    --query "properties.accessPolicies[?objectId=='fcd1a4ed-e367-477c-bb1b-f988dfbc18d0']"
+```
+output:
+
+```json
+[
+  {
+    "applicationId": null,
+    "objectId": "fcd1a4ed-e367-477c-bb1b-f988dfbc18d0",
+    "permissions": {
+      "certificates": [],
+      "keys": [],
+      "secrets": [
+        "get"
+      ],
+      "storage": null
+    },
+    "tenantId": "9ddff61d-1e0f-425a-9643-d8a7cd9ad409"
+  }
+]
+```
+
+az identity show \
+    --ids "/subscriptions/44feaee5-c984-4c09-a02f-46c7d78ad294/resourceGroups/rg-webappphpmysql/providers/Microsoft.ManagedIdentity/userAssignedIdentities/webappphpmysql3"
+
+```json
+{
+  "clientId": "93ef3fa2-83a9-4f01-b605-8915590e7831",
+  "id": "/subscriptions/44feaee5-c984-4c09-a02f-46c7d78ad294/resourcegroups/rg-webappphpmysql/providers/Microsoft.ManagedIdentity/userAssignedIdentities/webappphpmysql3",
+  "location": "westeurope",
+  "name": "webappphpmysql3",
+  "principalId": "fcd1a4ed-e367-477c-bb1b-f988dfbc18d0",
+  "resourceGroup": "rg-webappphpmysql",
+  "systemData": null,
+  "tags": {},
+  "tenantId": "9ddff61d-1e0f-425a-9643-d8a7cd9ad409",
+  "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+}
+```
