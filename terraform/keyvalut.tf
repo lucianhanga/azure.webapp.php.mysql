@@ -51,9 +51,11 @@ resource azurerm_key_vault_access_policy "webapp" {
   object_id = azurerm_linux_web_app.webapp.identity[0].principal_id
   secret_permissions = ["Get"]
 
-  depends_on = [ azurerm_key_vault.key_vault ]
+  depends_on = [ 
+    azurerm_key_vault.key_vault,
+    azurerm_linux_web_app.webapp
+  ]
 }
-
 
 # add the mysql username and password to the key vault
 resource "azurerm_key_vault_secret" "mysql_username" {
