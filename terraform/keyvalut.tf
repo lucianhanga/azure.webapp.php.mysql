@@ -24,9 +24,9 @@ resource "azurerm_key_vault" "key_vault" {
     secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
   }
 
-  # lifecycle {
-  #   ignore_changes = [access_policy]
-  # }
+  lifecycle {
+    ignore_changes = [access_policy]
+  }
 
   # make sure that the webapp is created before creating the key vault 
   #   so that we can give it access to the key vault
@@ -36,15 +36,15 @@ resource "azurerm_key_vault" "key_vault" {
 }
 
 
-# # give rights to the terraform service principal to read the username and password from the key vault
-# resource azurerm_key_vault_access_policy "terraform" {
-#   key_vault_id = azurerm_key_vault.key_vault.id
-#   tenant_id = var.tenant_id
-#   object_id = var.object_id
-#   secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
+# give rights to the terraform service principal to read the username and password from the key vault
+resource azurerm_key_vault_access_policy "terraform" {
+  key_vault_id = azurerm_key_vault.key_vault.id
+  tenant_id = var.tenant_id
+  object_id = var.object_id
+  secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover"]
 
-#   depends_on = [ azurerm_key_vault.key_vault ]
-# }
+  depends_on = [ azurerm_key_vault.key_vault ]
+}
 
 # give rights to the webapp to read the username and password from the key vault
 resource azurerm_key_vault_access_policy "webapp" {
@@ -83,5 +83,3 @@ resource "azurerm_key_vault_secret" "mysql_password" {
     local.mysql_password 
   ]
 }
-
-
