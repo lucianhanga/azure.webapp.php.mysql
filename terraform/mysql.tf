@@ -1,29 +1,26 @@
 
-# generate a username for the MySQL server
+# generate a username for the MySQL server and start with a letter
 resource "random_string" "mysql_username" {
-  length = 16
+  length = 15
   special = false
-  upper = false 
+  upper = false
 }
-locals {
-  mysql_username = random_string.mysql_username.result
-  depends_on = [ random_string.mysql_username ]
-}
-output "mysql_username" {
-  value = local.mysql_username
-}
-
-
 # generate a password for the MySQL server
 resource "random_password" "mysql_password" {
   length           = 16
   special          = true
   override_special = "_-"
 }
+
 locals {
+  mysql_username = "u${random_string.mysql_username.result}"
   mysql_password = random_password.mysql_password.result
-  depends_on = [ random_password.mysql_password ]
+  depends_on = [ random_password.mysql_password , random_string.mysql_username ]
 }
+output "mysql_username" {
+  value = local.mysql_username
+}
+
 output "mysql_password" {
   value = local.mysql_password
   sensitive = true
