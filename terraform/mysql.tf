@@ -42,6 +42,16 @@ resource "azurerm_mysql_flexible_server" "mysql" {
 
 }
 
+# enable access from within the Azure network
+resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_network" {
+  name                = "AllowAzureNetwork"
+  resource_group_name = var.resource_group_name
+  server_name         = azurerm_mysql_flexible_server.mysql.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
+
+  depends_on = [ azurerm_mysql_flexible_server.mysql ]
+}
 
 # create a database name in the MySQL server
 locals {
