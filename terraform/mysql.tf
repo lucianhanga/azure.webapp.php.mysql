@@ -7,6 +7,7 @@ resource "random_string" "mysql_username" {
 }
 locals {
   mysql_username = random_string.mysql_username.result
+  depends_on = [ random_string.mysql_username ]
 }
 output "mysql_username" {
   value = local.mysql_username
@@ -21,6 +22,7 @@ resource "random_password" "mysql_password" {
 }
 locals {
   mysql_password = random_password.mysql_password.result
+  depends_on = [ random_password.mysql_password ]
 }
 output "mysql_password" {
   value = local.mysql_password
