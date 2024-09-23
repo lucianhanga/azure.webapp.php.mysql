@@ -16,8 +16,6 @@ resource "azurerm_key_vault" "key_vault" {
   soft_delete_retention_days = 7
   purge_protection_enabled   = false
 
-
-
   # give access to the current user service principal to the key vault
   #   to add the username and password to the key vault for the MySQL server
   access_policy {
@@ -31,7 +29,9 @@ resource "azurerm_key_vault" "key_vault" {
 
   # make sure that the webapp is created before creating the key vault 
   #   so that we can give it access to the key vault
-  depends_on = [ azurerm_linux_web_app.webapp ]
+  depends_on = [ 
+    azurerm_linux_web_app.webapp
+    ]
 }
 
 
@@ -66,7 +66,6 @@ resource "azurerm_key_vault_secret" "mysql_username" {
 
   # first make sure the MySQL server is created before adding the username to the key vault
   depends_on = [ 
-    azurerm_mysql_flexible_server.mysql, 
     azurerm_key_vault.key_vault,
     local.mysql_username 
   ]
@@ -79,11 +78,9 @@ resource "azurerm_key_vault_secret" "mysql_password" {
 
   # first make sure the MySQL server is created before adding the password to the key vault
   depends_on = [ 
-    azurerm_mysql_flexible_server.mysql, 
     azurerm_key_vault.key_vault, 
     local.mysql_password 
   ]
 }
-
 
 

@@ -38,6 +38,9 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   version                = "8.0.21"
   zone                   = 2
   geo_redundant_backup_enabled = false
+
+  depends_on = [ local.mysql_username, local.mysql_password ]
+
 }
 
 
@@ -53,6 +56,8 @@ resource "azurerm_mysql_flexible_database" "database" {
   server_name         = azurerm_mysql_flexible_server.mysql.name
   charset             = "utf8mb3"
   collation           = "utf8mb3_unicode_ci"
+
+  depends_on = [ azurerm_mysql_flexible_server.mysql ]
 }
 
 # create a hello world table in the database for testing purposes

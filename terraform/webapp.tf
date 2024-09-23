@@ -34,6 +34,8 @@ resource "azurerm_linux_web_app" "webapp" {
     identity {
         type = "SystemAssigned"
     }
+
+    depends_on = [ azurerm_service_plan.webapp_serviceplan ]
 }
 
 
