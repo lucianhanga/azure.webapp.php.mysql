@@ -29,8 +29,6 @@ resource "azurerm_key_vault" "key_vault" {
     ignore_changes = [access_policy]
   }
 
-  purge_protection_enabled = false # make the key vault deletable for development purposes
-
   # make sure that the webapp is created before creating the key vault 
   #   so that we can give it access to the key vault
   depends_on = [ azurerm_linux_web_app.webapp ]
