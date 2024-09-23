@@ -13,6 +13,7 @@ resource "azurerm_key_vault" "key_vault" {
   location            = var.location
   tenant_id            = var.tenant_id
   sku_name            = "standard"
+  soft_delete_retention_days = 7
 
 
   # give access to the current user service principal to the key vault
