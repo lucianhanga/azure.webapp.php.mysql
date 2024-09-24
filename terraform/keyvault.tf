@@ -22,18 +22,6 @@ resource "azurerm_key_vault" "key_vault" {
     ]
 }
 
-# get the object id of the current user - which is the service principal
-data "azurerm_client_config" "current" {}
-
-resource "azurerm_role_assignment" "current" {
-  scope                = azurerm_key_vault.key_vault.id
-  role_definition_name = "Owner" # full access to the key vault
-  principal_id         = data.azurerm_client_config.current.object_id
-
-  depends_on = [ azurerm_key_vault.key_vault ]
-}
-
-
 resource "azurerm_role_assignment" "webapp" {
   scope                = azurerm_key_vault.key_vault.id
   role_definition_name = "Key Vault Secrets User" # read access to the key vault
