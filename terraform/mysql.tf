@@ -66,7 +66,7 @@ resource "azurerm_mysql_flexible_database" "database" {
   charset             = "utf8mb3"
   collation           = "utf8mb3_unicode_ci"
 
-  depends_on = [ azurerm_mysql_flexible_server.mysql ]
+  depends_on = [ azurerm_mysql_flexible_server_firewall_rule.allow_azure_network ]
 }
 
 # create a hello world table in the database for testing purposes
