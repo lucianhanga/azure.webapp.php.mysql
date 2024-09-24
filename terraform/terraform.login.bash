@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# call it source ./terraform.login.bash
+
 # Define the path to the terraform.tfvars file
 TFVARS_FILE="terraform.tfvars"
 
@@ -42,7 +44,8 @@ else
   echo "Azure login failed."
 fi
 
-# Clean up temporary JSON file
-rm -f "$AZURE_CREDENTIALS_JSON"
+export ARM_CLIENT_ID=$CLIENT_ID
+export ARM_CLIENT_SECRET=$CLIENT_SECRET
+export ARM_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
+export ARM_TENANT_ID=$TENANT_ID
 
-az login --service-principal -u CLIENT_ID -p CLIENT_SECRET --tenant TENANT_ID
