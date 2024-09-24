@@ -39,7 +39,6 @@ resource "azurerm_key_vault_secret" "mysql_username" {
   # first make sure the MySQL server is created before adding the username to the key vault
   depends_on = [ 
     azurerm_key_vault.key_vault,
-    azurerm_role_assignment.current,
     local.mysql_username 
   ]
 }
@@ -52,7 +51,6 @@ resource "azurerm_key_vault_secret" "mysql_password" {
   # first make sure the MySQL server is created before adding the password to the key vault
   depends_on = [ 
     azurerm_key_vault.key_vault, 
-    azurerm_role_assignment.current,
     local.mysql_password 
   ]
 }
