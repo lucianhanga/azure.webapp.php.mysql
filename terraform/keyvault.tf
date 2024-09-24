@@ -22,7 +22,7 @@ resource "azurerm_key_vault" "key_vault" {
     ]
 }
 
-resource "aruzrem_role_assignment" "terraform" {
+resource "aruzerm_role_assignment" "terraform" {
   scope = azurerm_key_vault.key_vault.id
   role_definition_name = "Key Vault Secrets Officer" 
   principal_id = var.object_id
