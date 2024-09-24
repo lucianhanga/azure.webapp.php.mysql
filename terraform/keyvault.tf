@@ -46,7 +46,7 @@ resource "azurerm_key_vault_secret" "mysql_username" {
   # first make sure the MySQL server is created before adding the username to the key vault
   depends_on = [ 
     azurerm_key_vault.key_vault,
-    aruzrem_role_assignment.terraform,
+    azurerm_role_assignment.terraform,
     local.mysql_username 
   ]
 }
@@ -59,7 +59,7 @@ resource "azurerm_key_vault_secret" "mysql_password" {
   # first make sure the MySQL server is created before adding the password to the key vault
   depends_on = [ 
     azurerm_key_vault.key_vault, 
-    aruzrem_role_assignment.terraform,
+    azurerm_role_assignment.terraform,
     local.mysql_password 
   ]
 }
