@@ -63,7 +63,7 @@ $endpoint = "http://169.254.169.254/metadata/identity/oauth2/token";
 
 // Resource for the access token. This example uses Azure Resource Manager (ARM) API.
 // Change this to the appropriate resource for your needs (e.g., Graph API, Key Vault, etc.)
-$resource = "https://keyvalut.azure.com/";
+$resource = "https://valut.azure.com/";
 
 // Setting up the cURL request to get the access token
 $ch = curl_init();
