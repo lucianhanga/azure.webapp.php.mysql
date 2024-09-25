@@ -61,5 +61,5 @@ jobs:
 
         - name: Cleanup the Project Suffix
           run: |
-            gh variable delete ${{vars.PROJECT_SUFFIX}}
+            gh variable delete PROJECT_SUFFIX
 
