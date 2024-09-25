@@ -18,6 +18,7 @@ jobs:
     name: Terraform Provisioning
     runs-on: ubuntu-latest
     env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       # these are needed for Terraform to authenticate with Azure
       TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
       TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -37,11 +38,26 @@ jobs:
       TF_VAR_location: ${{ vars.AZURE_LOCATION }}
       TF_VAR_terraform_storage_account_name: ${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}
 
-
     steps:
         - name: Checkout code
           uses: actions/checkout@v4
 
+        - name: Create a project Suffix
+          id: project-suffix
+          run: |
+            if [ -z "${{ vars.PROJECT_SUFFIX }}" ]; then
+              echo "PROJECT_SUFFIX is not defined, generating a random suffix."
+              project_suffix=${RANDOM}${RANDOM}
+              echo "Generated Project Suffix: $project_suffix"
+              echo "PROJECT_SUFFIX=$project_suffix" >> $GITHUB_ENV
+              echo "TF_VAR_project_suffix=$project_suffix" >> $GITHUB_ENV
+              gh variable set PROJECT_SUFFIX -b $project_suffix
+            else
+              echo "Using existing variable for PROJECT_SUFFIX."
+              echo "PROJECT_SUFFIX=${{ vars.PROJECT_SUFFIX }}" >> $GITHUB_ENV
+              echo "TF_VAR_project_suffix=${{ vars.PROJECT_SUFFIX }}" >> $GITHUB_ENV
+            fi
+      
         - name: Setup Terraform
           uses: hashicorp/setup-terraform@v2
 

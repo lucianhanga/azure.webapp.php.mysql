@@ -30,7 +30,11 @@ resource "azurerm_role_assignment" "webapp" {
   role_definition_name = "Key Vault Secrets User" # read access to the key vault
   principal_id         = azurerm_linux_web_app.webapp.identity[0].principal_id
 
-  depends_on = [ azurerm_key_vault.key_vault, azurerm_linux_web_app.webapp ]
+  depends_on = [ 
+    azurerm_key_vault.key_vault, 
+    azurerm_linux_web_app.webapp,
+    azurerm_role_assignment.terraform
+  ]
 }
 
 # add the mysql username and password to the key vault

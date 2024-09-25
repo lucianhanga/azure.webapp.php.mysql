@@ -15,7 +15,6 @@ function getAccessToken() {
     $resource = "https://vault.azure.net";
     echo "<p><strong>Step 0.3:</strong> Retrieved the resource from environment variables: <code>$resource</code></p>";
 
-
     // if user-managed identity
     // $client_id = "cf8b339-82a2-471a-a3c9-0fc0be7a4093";
     // echo "<p><strong>Step 0.4:</strong> Retrieved the client_id from environment variables: <code>$client_id</code></p>";
@@ -183,11 +182,50 @@ function getPersonData($host, $dbname, $mysql_username, $mysql_password, $certif
     }
 }
 
-// Database configuration
-$host = 'mysql-webappphpmysql7.mysql.database.azure.com';
-$dbname = 'db-webappphpmysql';
+// get the Key Vault Name from the environment variables
+if ( $keyvault_name = getenv('KEYVAULT_NAME') ) {
+    echo "<p><strong>KEYVAULT_NAME:</strong> $keyvault_name</p>";
+} else {
+    echo "<p><strong>Error:</strong> KEYVAULT_NAME not found in environment variables.</p>";
+    exit();
+}
+
+// get the MySQL server name
+if ( $mysql_server_name = getenv('MYSQL_SERVER_NAME') ) {
+    echo "<p><strong>MYSQL_SERVER_NAME:</strong> $mysql_server_name</p>";
+} else {
+    echo "<p><strong>Error:</strong> MYSQL_SERVER_NAME not found in environment variables.</p>";
+    exit();
+}
+
+// get the MySQL database name
+if ( $mysql_database_name = getenv('MYSQL_DATABASE_NAME') ) {
+    echo "<p><strong>MYSQL_DATABASE_NAME:</strong> $mysql_database_name</p>";
+} else {
+    echo "<p><strong>Error:</strong> MYSQL_DATABASE_NAME not found in environment variables.</p>";
+    exit();
+}
+
+// get the name of the secret for the MySQL password
+if ( $mysql_password_secret_name = getenv('KEYVAULT_SECRET_MYSQL_PASSWORD') ) {
+    echo "<p><strong>KEYVAULT_SECRET_MYSQL_PASSWORD:</strong> $mysql_password_secret_name</p>";
+} else {
+    echo "<p><strong>Error:</strong> KEYVAULT_SECRET_MYSQL_PASSWORD not found in environment variables.</p>";
+    exit();
+}
+
+// get the name of the secret for the MySQL username
+if ( $mysql_username_secret_name = getenv('KEYVAULT_SECRET_MYSQL_USERNAME') ) {
+    echo "<p><strong>KEYVAULT_SECRET_MYSQL_USERNAME:</strong> $mysql_username_secret_name</p>";
+} else {
+    echo "<p><strong>Error:</strong>KEYVAULT_SECRET_MYSQL_USERNAME not found in environment variables.</p>";
+    exit();
+}
+
+# mysql host name $mysql_server_name + ".mysql.database.azure.com";
+$host = $mysql_server_name . ".mysql.database.azure.com";
+# ca certificate file to check the chain of trust
 $certificate = 'DigiCertGlobalRootCA.crt.pem';
-$keyvalut_name = 'kv-webappphpmysql7';
 
 // get the access token from Azure AD
 echo "<h1> Get the access token from Azure AD </h1>";
@@ -201,7 +239,7 @@ if ($token) {
 }
 // get the username and password from Key Vault
 echo "<h1> Get the username from Key Vault </h1>";
-$mysql_username = getSecretFromKeyVault($token, $keyvalut_name, "mysql-username");
+$mysql_username = getSecretFromKeyVault($token, $keyvault_name, $mysql_username_secret_name);
 if ($mysql_username) {
     echo "<p><strong>Secret Value:</strong> <span style='color: red;'>****</span> (masked for security)</p>";
 } else {
@@ -210,7 +248,7 @@ if ($mysql_username) {
     exit();
 }
 echo "<h1> Get the password from Key Vault </h1>";
-$mysql_password = getSecretFromKeyVault($token, $keyvalut_name, "mysql-password");
+$mysql_password = getSecretFromKeyVault($token, $keyvault_name, $mysql_password_secret_name);
 if ($mysql_password) {
     echo "<p><strong>Secret Value:</strong> <span style='color: red;'>****</span> (masked for security)</p>";
 } else {
@@ -219,10 +257,9 @@ if ($mysql_password) {
     exit();
 }
 
-
 // get the data from the database
 echo "<h1> Get the data from the database </h1>";
-$persons = getPersonData($host, $dbname, $mysql_username, $mysql_password, $certificate);
+$persons = getPersonData($host, $mysql_database_name, $mysql_username, $mysql_password, $certificate);
 // Render the web page
 echo '<html><head><title>Person Records</title></head><body>';
 echo '<h1>Person Records</h1>';

@@ -13,18 +13,20 @@ jobs:
     defaults:
       run:
         shell: bash
-
     steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check if TERRAFORM_STORAGE_ACCOUNT_NAME is defined
-        id: check-secret
+        id: check-storage-account
         run: |
           if [ -z "${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" ]; then
-            echo "Variable TERRAFORM_STORAGE_ACCOUNT_NAME is not defined, generating a random suffix."
+            echo "Variable TERRAFORM_STORAGE_ACCOUNT_NAME is not defined, generating a random name."
             storage_account_name="terraform${RANDOM}${RANDOM}"
             echo "Generated Storage Account Name: $storage_account_name"
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=$storage_account_name" >> $GITHUB_ENV
-            gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
-
+            gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b $storage_account_name
           else
             echo "Using existing variable for TERRAFORM_STORAGE_ACCOUNT_NAME."
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
@@ -32,9 +34,6 @@ jobs:
 
       - name: Set Container Name
         run: echo "TERRAFORM_STORAGE_CONTAINER_NAME=tfstate" >> $GITHUB_ENV
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -48,9 +47,13 @@ jobs:
               --resource-group ${{ vars.AZURE_GROUP_NAME }} \
               --location ${{ vars.AZURE_LOCATION }} \
               --sku Standard_LRS \
-              --allow-blob-public-access false
+              --allow-blob-public-access false \
+              && echo "Storage account created successfully" \
+              || { echo "Failed to create the storage account"; gh variable delete TERRAFORM_STORAGE_ACCOUNT_NAME; exit 1; }
           if [ $? -ne 0 ]; then
             echo "Failed to create the storage account"
+            # cleanup also the env variable STORAGE_ACCOUNT_NAME
+            gh variable delete TERRAFORM_STORAGE_ACCOUNT_NAME
             exit 1
           fi
 
@@ -59,5 +62,4 @@ jobs:
           az storage container create \
               --name ${{ env.TERRAFORM_STORAGE_CONTAINER_NAME }} \
               --account-name ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
-
 

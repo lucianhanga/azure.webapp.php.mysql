@@ -1,9 +1,9 @@
 locals {
-  key_vault_name        = "kv-${var.project_name}" # the name of the key vault
-  app_service_plan_name = "asp-${var.project_name}"
-  webapp_name           = "webapp-${var.project_name}"    
-  mysql_server_name     = "mysql-${var.project_name}"
-  database_name         = "db-${var.project_name}"
+  key_vault_name        = "kv-${var.project_name}${var.project_suffix}" # the name of the key vault
+  app_service_plan_name = "asp-${var.project_name}${var.project_suffix}"
+  webapp_name           = "webapp-${var.project_name}${var.project_suffix}"    
+  mysql_server_name     = "mysql-${var.project_name}${var.project_suffix}"
+  database_name         = "db-${var.project_name}${var.project_suffix}"
   app_envionment_variables = {
     KEYVAULT_NAME = local.key_vault_name
     KEYVAULT_SECRET_MYSQL_USERNAME = "mysql-username"
