@@ -11,6 +11,7 @@ jobs:
     name: Terraform Destroy
     runs-on: ubuntu-latest
     env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       # these are needed for Terraform to authenticate with Azure
       TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
       TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -56,4 +57,8 @@ jobs:
         - name: Terraform Apply destroy
           working-directory: ./terraform
           run: terraform apply -input=false -auto-approve tfplan
+
+        - name: Cleanup the Project Suffix
+          run: |
+            gh variable delete PROJECT_SUFFIX
 
