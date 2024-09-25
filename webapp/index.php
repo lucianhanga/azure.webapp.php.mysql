@@ -206,24 +206,24 @@ if ( $mysql_database_name = getenv('MYSQL_DATABASE_NAME') ) {
     exit();
 }
 
-// get the name of the secret for the MySQL username
-if ( $mysql_username_secret_name = getenv('KEYVAULT_SECRET_MYSQL_USERNAME') ) {
-    echo "<p><strong>MYSQL_USERNAME_SECRET_NAME:</strong> $mysql_username_secret_name</p>";
-} else {
-    echo "<p><strong>Error:</strong> MYSQL_USERNAME_SECRET_NAME not found in environment variables.</p>";
-    exit();
-}
-
 // get the name of the secret for the MySQL password
 if ( $mysql_password_secret_name = getenv('KEYVAULT_SECRET_MYSQL_PASSWORD') ) {
-    echo "<p><strong>MYSQL_PASSWORD_SECRET_NAME:</strong> $mysql_password_secret_name</p>";
+    echo "<p><strong>KEYVAULT_SECRET_MYSQL_PASSWORD:</strong> $mysql_password_secret_name</p>";
 } else {
-    echo "<p><strong>Error:</strong> MYSQL_PASSWORD_SECRET_NAME not found in environment variables.</p>";
+    echo "<p><strong>Error:</strong> KEYVAULT_SECRET_MYSQL_PASSWORD not found in environment variables.</p>";
     exit();
 }
 
-# mysql host name
-$host = $mysql_server_name + ".mysql.database.azure.com";
+// get the name of the secret for the MySQL username
+if ( $mysql_username_secret_name = getenv('KEYVAULT_SECRET_MYSQL_USERNAME') ) {
+    echo "<p><strong>KEYVAULT_SECRET_MYSQL_USERNAME:</strong> $mysql_username_secret_name</p>";
+} else {
+    echo "<p><strong>Error:</strong>KEYVAULT_SECRET_MYSQL_USERNAME not found in environment variables.</p>";
+    exit();
+}
+
+# mysql host name $mysql_server_name + ".mysql.database.azure.com";
+$host = $mysql_server_name . ".mysql.database.azure.com";
 # ca certificate file to check the chain of trust
 $certificate = 'DigiCertGlobalRootCA.crt.pem';
 
@@ -256,7 +256,6 @@ if ($mysql_password) {
     // exit here
     exit();
 }
-
 
 // get the data from the database
 echo "<h1> Get the data from the database </h1>";

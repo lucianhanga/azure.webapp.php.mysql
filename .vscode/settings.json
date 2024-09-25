@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/44feaee5-c984-4c09-a02f-46c7d78ad294/resourceGroups/rg-webappphpmysql/providers/Microsoft.Web/sites/webapp-webappphpmysql7x",
+    "appService.deploySubpath": "webapp"
+}
