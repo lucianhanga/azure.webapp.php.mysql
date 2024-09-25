@@ -68,6 +68,6 @@ jobs:
           az role assignment create \
               --role "User Access Administrator" \
               --assignee ${{ secrets.AZURE_CLIENT_ID }} \
-              --scope "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.AZURE_GROUP_NAME }} \
+              --scope "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ vars.AZURE_GROUP_NAME }}" \
               && echo "User has been granted access to the storage account" \
               || { echo "Failed to grant access to the storage account"; exit 1; }
