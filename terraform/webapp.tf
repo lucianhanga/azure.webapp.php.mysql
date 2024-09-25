@@ -1,9 +1,4 @@
 
-locals {
-    app_service_plan_name = "asp-${var.project_name}"
-    webapp_name = "webapp-${var.project_name}"    
-}
-
 #
 # create the service plan for the webapp
 #
@@ -26,14 +21,19 @@ resource "azurerm_linux_web_app" "webapp" {
   site_config {
     always_on = false
     application_stack {
-        php_version = "8.1"
+        php_version = "8.3"
     }
   }
 
   # enable the managed identity for the webapp
-    identity {
-        type = "SystemAssigned"
-    }
+  identity {
+      type = "SystemAssigned"
+  }
+
+  # app settings
+  app_settings =  local.app_envionment_variables
+
+  depends_on = [ azurerm_service_plan.webapp_serviceplan ]
 }
 
 

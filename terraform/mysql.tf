@@ -1,34 +1,7 @@
 
-# generate a username for the MySQL server
-resource "random_string" "mysql_username" {
-  length = 16
-  special = false
-  upper = false 
-}
-locals {
-  mysql_username = random_string.mysql_username.result
-}
-output "mysql_username" {
-  value = local.mysql_username
-}
-
-
-# generate a password for the MySQL server
-resource "random_password" "mysql_password" {
-  length           = 16
-  special          = true
-  override_special = "_-"
-}
-locals {
-  mysql_password = random_password.mysql_password.result
-}
-output "mysql_password" {
-  value = local.mysql_password
-  sensitive = true
-}
 
 resource "azurerm_mysql_flexible_server" "mysql" {
-  name                   = "mysql-${var.project_name}"
+  name                   = local.mysql_server_name
   resource_group_name    = var.resource_group_name
   location               = var.location
   administrator_login    = local.mysql_username
@@ -38,13 +11,21 @@ resource "azurerm_mysql_flexible_server" "mysql" {
   version                = "8.0.21"
   zone                   = 2
   geo_redundant_backup_enabled = false
+
+  depends_on = [ local.mysql_username, local.mysql_password ]
+
 }
 
+# enable access from within the Azure network
+resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_network" {
+  name                = "AllowAzureNetwork"
+  resource_group_name = var.resource_group_name
+  server_name         = azurerm_mysql_flexible_server.mysql.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
 
-# create a database name in the MySQL server
-locals {
-  database_name = "db-${var.project_name}"
-} 
+  depends_on = [ azurerm_mysql_flexible_server.mysql ]
+}
 
 # create a database in the MySQL server
 resource "azurerm_mysql_flexible_database" "database" {
@@ -53,6 +34,8 @@ resource "azurerm_mysql_flexible_database" "database" {
   server_name         = azurerm_mysql_flexible_server.mysql.name
   charset             = "utf8mb3"
   collation           = "utf8mb3_unicode_ci"
+
+  depends_on = [ azurerm_mysql_flexible_server_firewall_rule.allow_azure_network ]
 }
 
 # create a hello world table in the database for testing purposes
