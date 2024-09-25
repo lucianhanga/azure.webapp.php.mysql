@@ -27,8 +27,3 @@ source ./terraform.login.bash
 ```
 
 Note: When creating the service principal for terraform, you need to give it the `Owner` role on the resource group where the infrastructure will be created.
-
-
-
-
-

@@ -1,6 +1,5 @@
 {
-    
     "require": {
-        "wapacro/az-keyvault-php": "^2.2"
-    }
+        "ext-pdo_mysql": "*"
+    }    
 }

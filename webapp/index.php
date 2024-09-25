@@ -1,5 +1,62 @@
 <?php
 
+// get the access token from Azure AD takiing in account 
+// that the WebApp is a system managed identity
+function getAccessToken() {
+    echo "<p><strong>Step 0:</strong> Retrieved the identity endpoint from environment variables: <code>$identity_endpoint</code></p>";
+
+    // get from the environment variable the IDENTIY_ENDPOINT
+    $identity_endpoint = getenv('IDENTITY_ENDPOINT');
+    echo "<p><strong>Step 0.1:</strong> Retrieved the identity header from environment variables: <code>$identity_header</code></p>"; 
+
+    // get from the environment variable the IDENTIY_HEADER
+    $identity_header = getenv('IDENTITY_HEADER');
+    echo "<p><strong>Step 0.2:</strong> Retrieved the identity header from environment variables: <code>$identity_header</code></p>";
+
+    // the intended resource to access
+    $resource = "https://vault.azure.net";
+    echo "<p><strong>Step 0.3:</strong> Retrieved the resource from environment variables: <code>$resource</code></p>";
+
+
+    // if user-managed identity
+    // $client_id = "cf8b339-82a2-471a-a3c9-0fc0be7a4093";
+    // echo "<p><strong>Step 0.4:</strong> Retrieved the client_id from environment variables: <code>$client_id</code></p>";
+
+    // if system-managed identity
+    // there is no client_id (of the user managed identity) required
+    $client_id = "";
+    echo "<p><strong>Step 0.4:</strong>No ClientID</code></p>";
+
+    // the api version
+    $api_version = "2019-08-01";
+    echo "<p><strong>Step 0.5:</strong> Retrieved the api_version from environment variables: <code>$api_version</code></p>";
+
+    // build the curl command
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, "$identity_endpoint?api-version=$api_version&resource=$resource&client_id=$client_id");
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-IDENTITY-HEADER: $identity_header"));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    # is GET
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+    $result = curl_exec($curl);
+
+    // check for any errors
+    if (curl_errno($curl)) {
+        echo "<p><strong>Error:</strong> cURL request failed. Error: " . curl_error($curl) . "</p>";
+        curl_close($curl);
+        return null;
+    }
+
+    // decode the result
+    $response = json_decode($result, true);
+    // print the response
+    echo "<p><strong>Step 0.6:</strong> Retrieved the response from the identity endpoint: <pre>" . print_r($response, true) . "</pre></p>";
+    // close the curl
+    curl_close($curl);
+    // return the access token
+    return $response['access_token'];
+}
+
 function getSecretFromKeyVault($accessToken, $vaultName, $secretName) {
     // Construct the URL for the specific secret in the Key Vault
     $url = "https://$vaultName.vault.azure.net/secrets/$secretName?api-version=7.3";
@@ -104,12 +161,21 @@ function getPersonData($host, $dbname, $mysql_username, $mysql_password, $certif
 }
 
 // Database configuration
-$host = 'mysql-webappphpmysql.mysql.database.azure.com';
+$host = 'mysql-webappphpmysql7.mysql.database.azure.com';
 $dbname = 'db-webappphpmysql';
 $certificate = 'DigiCertGlobalRootCA.crt.pem';
-$keyvalut_name = 'kv-webappphpmysql';
-$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ikg5bmo1QU9Tc3dNcGhnMVNGeDdqYVYtbEI5dyIsImtpZCI6Ikg5bmo1QU9Tc3dNcGhnMVNGeDdqYVYtbEI5dyJ9.eyJhdWQiOiJjZmE4YjMzOS04MmEyLTQ3MWEtYTNjOS0wZmMwYmU3YTQwOTMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85ZGRmZjYxZC0xZTBmLTQyNWEtOTY0My1kOGE3Y2Q5YWQ0MDkvIiwiaWF0IjoxNzI2OTk2NDMyLCJuYmYiOjE3MjY5OTY0MzIsImV4cCI6MTcyNzAwMTE3OSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhYQUFBQWRiMDdjSG9PYkhKYUJwK1p3Z1JCQlovcEVTaGlFV01CTzg1SldCU3pXUENKNFVrRE5qamthcTJHdWVOUlVIK0FjTU1lVjM5clliWnI1Q0RTaXpwYThwczIyTk43RU0xWWl0MzZBcTVxZFlDemF5TlJIcmkxMSt6eW93bmVGYVF2TTBmUjl4SUs5Q01maytUSGRiTWo1WHJVeVFPamVYSEhTSDVwYzRWcTdEcz0iLCJhbHRzZWNpZCI6IjE6bGl2ZS5jb206MDAwMTRCNTBCMkY1NzAxNCIsImFtciI6WyJwd2QiLCJtZmEiXSwiYXBwaWQiOiJiNjc3YzI5MC1jZjRiLTRhOGUtYTYwZS05MWJhNjUwYTRhYmUiLCJhcHBpZGFjciI6IjAiLCJlbWFpbCI6Imx1Y2lhbmhhbmdhQGhvdG1haWwuY29tIiwiZmFtaWx5X25hbWUiOiJIYW5nYSIsImdpdmVuX25hbWUiOiJMdWNpYW4iLCJncm91cHMiOlsiNDBmNjRmN2EtNDBmZC00YzY2LTk4MjctYmU0YWUzOTZkNzYxIl0sImlkcCI6ImxpdmUuY29tIiwiaWR0eXAiOiJ1c2VyIiwiaXBhZGRyIjoiNDYuMjQ0LjI0Ni41MSIsIm5hbWUiOiJMdWNpYW4gSGFuZ2EiLCJvaWQiOiJiZGI1ZjEzMy0wM2ZmLTQxZTktYTNlNi02NzA2MWJkZGJjOWEiLCJwdWlkIjoiMTAwMzIwMDIwRDMyNDI4MyIsInJoIjoiMC5BWGtBSGZiZm5ROGVXa0tXUTlpbnpaclVDVG16cU0taWdocEhvOGtQd0w1NlFKT1VBSVkuIiwic2NwIjoidXNlcl9pbXBlcnNvbmF0aW9uIiwic3ViIjoiXzJ4WlF1RmlEb0Y2dURuamVWdmpiQ0FSQ1FHT0p5eS01MlJfU0Qza19UayIsInRpZCI6IjlkZGZmNjFkLTFlMGYtNDI1YS05NjQzLWQ4YTdjZDlhZDQwOSIsInVuaXF1ZV9uYW1lIjoibGl2ZS5jb20jbHVjaWFuaGFuZ2FAaG90bWFpbC5jb20iLCJ1dGkiOiJoN2toVGV3cW4wS2VJMWFkV1BGTkFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyI2MmU5MDM5NC02OWY1LTQyMzctOTE5MC0wMTIxNzcxNDVlMTAiLCJiNzlmYmY0ZC0zZWY5LTQ2ODktODE0My03NmIxOTRlODU1MDkiXSwieG1zX2lkcmVsIjoiMSAxMiJ9.YzC-vFrWJrg5ZTcok2W2ZHxGyPixFyGvhh_RLYPJrHuQqWZsEl-sjIybuDb2yY08r2eAIpc-vIKYrCtWzxwoE6AyggPOEQrFRrHkn5jGh3nnieuAaJQdbtTOZtcuDxZaBT7Qqj17EPIN4tGWil1QvJduMhGp9mmKWuJwbzfnCDnOvBCWNZ4GMSe0Bp-I7IdwFT3hjAiZ1W_Zcs2LZMmCSnWTVrOD6aZeoX8bWevr-eeWvslk2qDX6zhk3IX9RaUjRotMsIMSSSWPbuYDqeVmAIG9oS7xoOYt_fvEJXeNDUhdw1hUXsgeg_4JW8e0hbBGvMZSSjVkWzNBPmgDMu6j5Q";
+$keyvalut_name = 'kv-webappphpmysql7';
 
+// get the access token from Azure AD
+echo "<h1> Get the access token from Azure AD </h1>";
+$token = getAccessToken();
+if ($token) {
+    echo "<p><strong>Token:</strong> <span style='color: red;'>****</span> (masked for security)</p>";
+} else {
+    echo "<p><strong>Error:</strong> Failed to retrieve access token.</p>";
+    // finish the script
+    exit();
+}
 // get the username and password from Key Vault
 echo "<h1> Get the username from Key Vault </h1>";
 $mysql_username = getSecretFromKeyVault($token, $keyvalut_name, "mysql-username");
