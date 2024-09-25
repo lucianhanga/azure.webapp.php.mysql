@@ -27,7 +27,6 @@ jobs:
             echo "Generated Storage Account Name: $storage_account_name"
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=$storage_account_name" >> $GITHUB_ENV
             gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b $storage_account_name
-
           else
             echo "Using existing variable for TERRAFORM_STORAGE_ACCOUNT_NAME."
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" >> $GITHUB_ENV
@@ -51,6 +50,8 @@ jobs:
               --allow-blob-public-access false
           if [ $? -ne 0 ]; then
             echo "Failed to create the storage account"
+            # cleanup also the env variable STORAGE_ACCOUNT_NAME
+            gh variable delete TERRAFORM_STORAGE_ACCOUNT_NAME
             exit 1
           fi
 
