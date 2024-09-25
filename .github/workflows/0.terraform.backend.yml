@@ -47,7 +47,9 @@ jobs:
               --resource-group ${{ vars.AZURE_GROUP_NAME }} \
               --location ${{ vars.AZURE_LOCATION }} \
               --sku Standard_LRS \
-              --allow-blob-public-access false
+              --allow-blob-public-access false \
+              && echo "Storage account created successfully" \
+              || { echo "Failed to create the storage account"; gh variable delete TERRAFORM_STORAGE_ACCOUNT_NAME; exit 1; }
           if [ $? -ne 0 ]; then
             echo "Failed to create the storage account"
             # cleanup also the env variable STORAGE_ACCOUNT_NAME
