@@ -3,11 +3,9 @@
 // get the access token from Azure AD takiing in account 
 // that the WebApp is a system managed identity
 function getAccessToken() {
-    echo "<p><strong>Step 0:</strong> Retrieved the identity endpoint from environment variables: <code>$identity_endpoint</code></p>";
-
     // get from the environment variable the IDENTIY_ENDPOINT
     $identity_endpoint = getenv('IDENTITY_ENDPOINT');
-    echo "<p><strong>Step 0.1:</strong> Retrieved the identity header from environment variables: <code>$identity_header</code></p>"; 
+    echo "<p><strong>Step 0.1:</strong> Retrieved the identity header from environment variables: <code>$identity_endpoint</code></p>"; 
 
     // get from the environment variable the IDENTIY_HEADER
     $identity_header = getenv('IDENTITY_HEADER');
