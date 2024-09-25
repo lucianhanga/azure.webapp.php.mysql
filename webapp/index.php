@@ -259,7 +259,7 @@ if ($mysql_password) {
 
 // get the data from the database
 echo "<h1> Get the data from the database </h1>";
-$persons = getPersonData($host, $dbname, $mysql_username, $mysql_password, $certificate);
+$persons = getPersonData($host, $mysql_database_name, $mysql_username, $mysql_password, $certificate);
 // Render the web page
 echo '<html><head><title>Person Records</title></head><body>';
 echo '<h1>Person Records</h1>';
