@@ -71,10 +71,10 @@ jobs:
           working-directory: ./terraform
           run: terraform validate
 
-        - name: Terraform Plan
-          working-directory: ./terraform
-          run: terraform plan -out=tfplan -input=false
+        # - name: Terraform Plan
+        #   working-directory: ./terraform
+        #   run: terraform plan -out=tfplan -input=false
 
-        - name: Terraform Apply
-          working-directory: ./terraform
-          run: terraform apply -input=false tfplan
+        # - name: Terraform Apply
+        #   working-directory: ./terraform
+        #   run: terraform apply -input=false tfplan
