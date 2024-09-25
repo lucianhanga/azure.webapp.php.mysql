@@ -1,0 +1,6 @@
+{
+    
+    "require": {
+        "wapacro/az-keyvault-php": "^2.2"
+    }
+}
