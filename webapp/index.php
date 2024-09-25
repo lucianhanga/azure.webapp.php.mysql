@@ -31,7 +31,29 @@ function getAccessToken() {
 
     // build the curl command
     $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, "$identity_endpoint?api-version=$api_version&resource=$resource&client_id=$client_id");
+
+    // setup also the parameters for the curl command 
+    $base_url = $identity_endpoint;
+    $params = array(
+        'api-version' => $api_version,
+        'resource' => $resource
+    );
+
+    // Add client_id to params only if it is defined and not empty
+    if (!empty($client_id)) {
+        $params['client_id'] = $client_id;
+    } else {
+        echo "<p><strong>Step 0.5:</strong> No client_id provided for system-assigned managed identity.</p>";
+    }
+    // Build the query string using http_build_query
+    $query_string = http_build_query($params);
+    // Combine base URL with query string
+    $full_url = $base_url . '?' . $query_string;
+
+    echo "<p><strong>Step 0.6:</strong> Constructed URL for cURL request: <code>$full_url</code></p>";
+    
+    curl_setopt($curl, CURLOPT_URL, $full_url);
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
     curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-IDENTITY-HEADER: $identity_header"));
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
     # is GET
@@ -48,7 +70,10 @@ function getAccessToken() {
     // decode the result
     $response = json_decode($result, true);
     // print the response
-    echo "<p><strong>Step 0.6:</strong> Retrieved the response from the identity endpoint: <pre>" . print_r($response, true) . "</pre></p>";
+    $response_print = $response;
+    # mask the token for security reasons
+    $response_print['access_token'] = "****";
+    echo "<p><strong>Step 0.6:</strong> Retrieved the response from the identity endpoint: <pre>" . print_r($response_print, true) . "</pre></p>";
     // close the curl
     curl_close($curl);
     // return the access token
@@ -181,6 +206,8 @@ if ($mysql_username) {
     echo "<p><strong>Secret Value:</strong> <span style='color: red;'>****</span> (masked for security)</p>";
 } else {
     echo "<p><strong>Error:</strong> Failed to retrieve secret value.</p>";
+    // exit here
+    exit();
 }
 echo "<h1> Get the password from Key Vault </h1>";
 $mysql_password = getSecretFromKeyVault($token, $keyvalut_name, "mysql-password");
@@ -188,6 +215,8 @@ if ($mysql_password) {
     echo "<p><strong>Secret Value:</strong> <span style='color: red;'>****</span> (masked for security)</p>";
 } else {
     echo "<p><strong>Error:</strong> Failed to retrieve secret value.</p>";
+    // exit here
+    exit();
 }
 
 
