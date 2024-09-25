@@ -1,0 +1,5 @@
+export KEYVAULT_NAME="kv-phpapp398425647"
+export KEYVAULT_SECRET_MYSQL_USERNAME="mysql-username"
+export KEYVAULT_SECRET_MYSQL_PASSWORD="mysql-password"
+export MYSQL_SERVER_NAME="mysql-phpapp398425647"
+export MYSQL_DATABASE_NAME="db-phpapp398425647"
