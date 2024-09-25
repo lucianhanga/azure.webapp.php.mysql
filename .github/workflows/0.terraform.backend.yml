@@ -23,7 +23,7 @@ jobs:
             project_suffix=${RANDOM}${RANDOM}
             echo "Generated Project Suffix: $project_suffix"
             echo "PROJECT_SUFFIX=$project_suffix" >> $GITHUB_ENV
-            gh variable set PROJECT_SUFFIX -b ${{env.PROJECT_SUFFIX}}
+            gh variable set PROJECT_SUFFIX -b $project_suffix
           else
             echo "Using existing variable for PROJECT_SUFFIX."
             echo "PROJECT_SUFFIX=${{ vars.PROJECT_SUFFIX }}" >> $GITHUB_ENV
@@ -37,7 +37,7 @@ jobs:
             storage_account_name="terraform${{ env.PROJECT_SUFFIX }}"
             echo "Generated Storage Account Name: $storage_account_name"
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=$storage_account_name" >> $GITHUB_ENV
-            gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b ${{ env.TERRAFORM_STORAGE_ACCOUNT_NAME }}
+            gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b $storage_account_name
 
           else
             echo "Using existing variable for TERRAFORM_STORAGE_ACCOUNT_NAME."
