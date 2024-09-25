@@ -23,7 +23,7 @@ jobs:
         run: |
           if [ -z "${{ vars.TERRAFORM_STORAGE_ACCOUNT_NAME }}" ]; then
             echo "Variable TERRAFORM_STORAGE_ACCOUNT_NAME is not defined, generating a random name."
-            storage_account_name="terraform${RANDOM}{RANDOM}"
+            storage_account_name="terraform${RANDOM}${RANDOM}"
             echo "Generated Storage Account Name: $storage_account_name"
             echo "TERRAFORM_STORAGE_ACCOUNT_NAME=$storage_account_name" >> $GITHUB_ENV
             gh variable set TERRAFORM_STORAGE_ACCOUNT_NAME -b $storage_account_name
