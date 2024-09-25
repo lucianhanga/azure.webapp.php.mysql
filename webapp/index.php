@@ -248,7 +248,7 @@ if ($mysql_username) {
     exit();
 }
 echo "<h1> Get the password from Key Vault </h1>";
-$mysql_password = getSecretFromKeyVault($token, $keyvalut_name, $mysql_password_secret_name);
+$mysql_password = getSecretFromKeyVault($token, $keyvault_name, $mysql_password_secret_name);
 if ($mysql_password) {
     echo "<p><strong>Secret Value:</strong> <span style='color: red;'>****</span> (masked for security)</p>";
 } else {
