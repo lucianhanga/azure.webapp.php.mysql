@@ -1,9 +1,4 @@
 
-locals {
-    app_service_plan_name = "asp-${var.project_name}"
-    webapp_name = "webapp-${var.project_name}"    
-}
-
 #
 # create the service plan for the webapp
 #
@@ -31,11 +26,14 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 
   # enable the managed identity for the webapp
-    identity {
-        type = "SystemAssigned"
-    }
+  identity {
+      type = "SystemAssigned"
+  }
 
-    depends_on = [ azurerm_service_plan.webapp_serviceplan ]
+  # app settings
+  app_settings =  local.app_envionment_variables
+
+  depends_on = [ azurerm_service_plan.webapp_serviceplan ]
 }
 
 

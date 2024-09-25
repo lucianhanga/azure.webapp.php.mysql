@@ -1,7 +1,3 @@
-locals {
-  key_vault_name = "kv-${var.project_name}" # the name of the key vault
-}
-
 
 # create a key vault where to store the username and password for the MySQL server
 resource "azurerm_key_vault" "key_vault" {

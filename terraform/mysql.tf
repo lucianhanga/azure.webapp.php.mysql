@@ -1,33 +1,7 @@
 
-# generate a username for the MySQL server and start with a letter
-resource "random_string" "mysql_username" {
-  length = 15
-  special = false
-  upper = false
-}
-# generate a password for the MySQL server
-resource "random_password" "mysql_password" {
-  length           = 16
-  special          = true
-  override_special = "_-"
-}
-
-locals {
-  mysql_username = "u${random_string.mysql_username.result}"
-  mysql_password = random_password.mysql_password.result
-  depends_on = [ random_password.mysql_password , random_string.mysql_username ]
-}
-output "mysql_username" {
-  value = local.mysql_username
-}
-
-output "mysql_password" {
-  value = local.mysql_password
-  sensitive = true
-}
 
 resource "azurerm_mysql_flexible_server" "mysql" {
-  name                   = "mysql-${var.project_name}"
+  name                   = local.mysql_server_name
   resource_group_name    = var.resource_group_name
   location               = var.location
   administrator_login    = local.mysql_username
@@ -52,11 +26,6 @@ resource "azurerm_mysql_flexible_server_firewall_rule" "allow_azure_network" {
 
   depends_on = [ azurerm_mysql_flexible_server.mysql ]
 }
-
-# create a database name in the MySQL server
-locals {
-  database_name = "db-${var.project_name}"
-} 
 
 # create a database in the MySQL server
 resource "azurerm_mysql_flexible_database" "database" {
